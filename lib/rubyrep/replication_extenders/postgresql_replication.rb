@@ -61,8 +61,11 @@ module RR
                 INSERT INTO #{schema_prefix}#{params[:log_table]}(change_table, change_key, change_type, change_time)
                   SELECT '#{params[:table]}', #{key_clause('OLD', params)}, 'D', now();
               ELSIF (TG_OP = 'UPDATE') THEN
-                INSERT INTO  #{schema_prefix}#{params[:log_table]}(change_table, change_key, change_new_key, change_type, change_time)
-                  SELECT '#{params[:table]}', #{key_clause('OLD', params)}, #{key_clause('NEW', params)}, 'U', now();
+                -- only insert if data is different, works only with pg >= 8.4
+                IF NEW IS DISTINCT FROM OLD THEN
+                  INSERT INTO  #{schema_prefix}#{params[:log_table]}(change_table, change_key, change_new_key, change_type, change_time)
+                    SELECT '#{params[:table]}', #{key_clause('OLD', params)}, #{key_clause('NEW', params)}, 'U', now();
+                END IF;
               ELSIF (TG_OP = 'INSERT') THEN
                 INSERT INTO  #{schema_prefix}#{params[:log_table]}(change_table, change_key, change_type, change_time)
                   SELECT '#{params[:table]}', #{key_clause('NEW', params)}, 'I', now();
