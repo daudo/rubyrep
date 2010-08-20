@@ -5,7 +5,7 @@ include RR
 describe BaseRunner do
   before(:each) do
   end
-
+# alala
   it "process_options should make options as nil and teturn status as 1 if command line parameters are unknown" do
     # also verify that an error message is printed
     $stderr.should_receive(:puts).any_number_of_times
